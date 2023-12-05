@@ -1,0 +1,6 @@
+@genesis_valida_importacao_teste_HostAddress = http://localhost:5001
+
+GET {{genesis_valida_importacao_teste_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
