@@ -1,4 +1,5 @@
-﻿using genesis_valida_importacao_teste.Interfaces;
+﻿using genesis_valida_importacao_teste.consome_smtp;
+using genesis_valida_importacao_teste.Interfaces;
 using genesis_valida_importacao_teste.valida_arquivo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +23,7 @@ namespace genesis_valida_importacao_teste.Controllers
         [HttpGet]
         public IActionResult Processo()
         {
+           
             _consumidor.IniciaConsumo();
             return Ok();
         }

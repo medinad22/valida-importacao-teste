@@ -11,9 +11,9 @@ namespace genesis_valida_importacao_teste.valida_arquivo
             ValidaTamanho(tamanhoArquivo, validador.TamanhoMaximo);
         }
 
-        private static void ValidaNome(string nome, string pattern)
+        private static void ValidaNome(string nome, List<string> regexPatterns)
         { 
-            if(!Regex.Match(nome, @$"{pattern}").Success)
+            if(!regexPatterns.Any(pattern => Regex.IsMatch(nome, pattern)))
             {
                 throw new ArgumentException();    
             };

@@ -1,4 +1,5 @@
 ﻿using FluentFTP;
+using FluentFTP.Rules;
 using genesis_valida_importacao_teste.EnviaArquivo;
 using genesis_valida_importacao_teste.Interfaces;
 using genesis_valida_importacao_teste.valida_arquivo;
@@ -27,7 +28,6 @@ namespace genesis_valida_importacao_teste.consome_ftp
             await ftpClient.AutoConnect();
 
             List<Validadores> validadores = validadoresConfig.Validadores.ToList();
-            
             foreach (var validador in validadores)
             {
                 FtpListItem[] items = await ftpClient.GetListing(validador.Diretorio);
@@ -39,7 +39,7 @@ namespace genesis_valida_importacao_teste.consome_ftp
                         case FtpObjectType.File:
                             ValidaArquivo.Valida(item.Name, item.Size, validador);
                             byte[] bytes = await ftpClient.DownloadBytes(item.FullName, token);
-                            await enviaArquivo.EnviaArquivoFTP(bytes, validador.S3Folder, item.Name);
+                            await enviaArquivo.EnviaArquivoFTP(bytes, validador, item.Name);
                             break;
 
                         case FtpObjectType.Link:
