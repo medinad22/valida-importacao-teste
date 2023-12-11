@@ -10,21 +10,15 @@ namespace genesis_valida_importacao_teste.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SincronizaProcesso : ControllerBase
+    public class SincronizaProcesso(IConsumidor consumidor) : ControllerBase
     {
-        private readonly IConsumidor _consumidor;
-
-
-        public SincronizaProcesso(IConsumidor consumidor)
-        {
-            _consumidor = consumidor;
-        }
+        private readonly IConsumidor _consumidor = consumidor;
 
         [HttpGet]
         public IActionResult Processo()
         {
            
-            _consumidor.IniciaConsumo();
+            _consumidor.IniciaConsumo2();
             return Ok();
         }
 

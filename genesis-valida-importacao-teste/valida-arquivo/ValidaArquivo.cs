@@ -5,7 +5,7 @@ namespace genesis_valida_importacao_teste.valida_arquivo
     public class ValidaArquivo
     {
 
-        public static void Valida(string nome, long tamanhoArquivo, Validadores validador)
+        public static void Valida(string nome, long tamanhoArquivo, Layouts validador)
         {
             ValidaNome(nome, validador.PadraoNome);
             ValidaTamanho(tamanhoArquivo, validador.TamanhoMaximo);

@@ -16,11 +16,13 @@ builder.Services.AddSingleton<IConsumidor, ConsumoFtp>();
 // Configuração da seção "Validadores"
 builder.Services.Configure<ValidadoresOptions>(options =>
 {
-    options.Validadores = builder.Configuration.GetRequiredSection("Validadores").Get<List<Validadores>>();
+    options.Validadores = builder.Configuration.GetRequiredSection("Layouts").Get<List<Layouts>>();
 });
 
 builder.Services.Configure<FtpConfig>(
     builder.Configuration.GetSection("FTPServer"));
+builder.Services.Configure<S3Config>(
+    builder.Configuration.GetSection("S3Config"));
 builder.Services.AddSingleton<IEnviaArquivo, S3EnviaArquivo>();
 var app = builder.Build();
 

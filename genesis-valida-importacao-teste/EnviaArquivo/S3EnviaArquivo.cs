@@ -2,78 +2,48 @@
 using Amazon.S3.Model;
 using genesis_valida_importacao_teste.valida_arquivo;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Options;
+using static Org.BouncyCastle.Math.EC.ECCurve;
+using Amazon.Internal;
+using Amazon;
 
 namespace genesis_valida_importacao_teste.EnviaArquivo
 {
-    public class S3EnviaArquivo : IEnviaArquivo
+    public class S3EnviaArquivo(IOptions<S3Config> s3Config) : IEnviaArquivo
     {
-        public async Task EnviaArquivoFTP(byte[] file, string folder, string fileName)
-        {
-            MemoryStream ms = new MemoryStream();
-            ms.Write(file, 0, file.Length);
-            
-            StreamReader sr = new StreamReader(ms);
-            
 
+        private readonly S3Config s3Config = s3Config.Value;
+
+        public async Task EnviaArquivoFTP2(byte[] file, Layouts validadores, string fileName)
+        {
+            MemoryStream ms = new(file);
+            StreamReader sr = new(ms);
             var config = new AmazonS3Config()
             {
-                ServiceURL = "http://s3.localhost.localstack.cloud:4566/"
+                ServiceURL = s3Config.ServiceUrl
+
             };
             var s3client = new AmazonS3Client(config);
             var objectRequest = new PutObjectRequest()
             {
-                BucketName = "maxpar-apolicies-transient",
-                Key = $"{folder}/{fileName}",
+                BucketName = s3Config.ApolicesBucketName,
+                Key = $"{GetS3Folder(validadores, fileName)}/{fileName}",
                 InputStream = sr.BaseStream,
-                
-            };
 
-            Console.WriteLine(objectRequest.Key);
+            };
             await s3client.PutObjectAsync(objectRequest);
             await ms.FlushAsync();
             ms.Close();
             sr.Close();
         }
 
-
-        public async Task EnviaArquivoFTP(byte[] file, Validadores validadores, string fileName)
-        {
-
-            var folder = CriaPasta(validadores, fileName);
-            Console.WriteLine($"{folder}");
-            MemoryStream ms = new MemoryStream();
-            ms.Write(file, 0, file.Length);
-
-            StreamReader sr = new StreamReader(ms);
-
-
-            var config = new AmazonS3Config()
-            {
-                ServiceURL = "http://s3.localhost.localstack.cloud:4566/"
-            };
-            var s3client = new AmazonS3Client(config);
-            var objectRequest = new PutObjectRequest()
-            {
-                BucketName = "maxpar-apolicies-transient",
-                Key = $"{folder}/{fileName}",
-                InputStream = sr.BaseStream,
-
-            };
-
-            Console.WriteLine(objectRequest.Key);
-            await s3client.PutObjectAsync(objectRequest);
-            await ms.FlushAsync();
-            ms.Close();
-            sr.Close();
-        }
-
-        private string CriaPasta(Validadores validadores, string fileName)
+        private static string GetS3Folder(Layouts validadores, string fileName)
         {
             if (!validadores.CargaDiaria)
             {
                 return validadores.S3Folder;
             }
-            if(validadores.PadraoNomeDiario.Any(pattern => Regex.IsMatch(fileName, pattern)))
+            if (validadores.PadraoNomeDiario.Any(pattern => Regex.IsMatch(fileName, pattern)))
             {
                 return validadores.S3FolderDiario;
             }
@@ -82,8 +52,30 @@ namespace genesis_valida_importacao_teste.EnviaArquivo
                 return validadores.S3FolderFull;
             }
 
-
             return validadores.S3Folder;
+
+        }
+
+        public async Task EnviaArquivoFTP(byte[] file, Layouts validadores, string fileName)
+        {
+            var config = new AmazonS3Config()
+            {
+                ServiceURL = s3Config.ServiceUrl,
+
+            };
+            var s3client = new AmazonS3Client(config);
+            using (MemoryStream ms = new MemoryStream(file))
+            using (StreamReader sr = new StreamReader(ms))
+            {
+                var objectRequest = new PutObjectRequest
+                {
+                    BucketName = s3Config.ApolicesBucketName,
+                    Key = $"{GetS3Folder(validadores, fileName)}/{fileName}",
+                    InputStream = sr.BaseStream
+                };
+
+                await s3client.PutObjectAsync(objectRequest);
+            }
 
         }
     }

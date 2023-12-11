@@ -3,6 +3,8 @@
     public interface IConsumidor
     {
 
-        void IniciaConsumo(); 
+        void IniciaConsumo();
+        void IniciaConsumo2();
+
     }
 }

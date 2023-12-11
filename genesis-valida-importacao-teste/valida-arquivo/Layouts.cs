@@ -1,6 +1,6 @@
 ﻿namespace genesis_valida_importacao_teste.valida_arquivo
 {
-    public class Validadores
+    public class Layouts
     {
         public string Diretorio { get; set; }
         public List<string> PadraoNome { get; set; }
