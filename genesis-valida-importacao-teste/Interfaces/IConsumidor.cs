@@ -6,5 +6,7 @@
         void IniciaConsumo();
         void IniciaConsumo2();
 
+        void IniciaConsumoParalelo();
+
     }
 }

@@ -18,7 +18,7 @@ namespace genesis_valida_importacao_teste.Controllers
         public IActionResult Processo()
         {
            
-            _consumidor.IniciaConsumo2();
+            _consumidor.IniciaConsumoParalelo();
             return Ok();
         }
 

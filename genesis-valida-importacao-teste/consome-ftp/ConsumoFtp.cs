@@ -60,7 +60,6 @@ namespace genesis_valida_importacao_teste.consome_ftp
             List<Layouts> validadores = validadoresConfig.Validadores;
             foreach (var validador in validadores)
             {
-                Console.WriteLine(validador.Diretorio.ToString());
                 var token = new CancellationToken();
                 var ftpClient = new AsyncFtpClient(ftpConfig.Host, ftpConfig.User, ftpConfig.Password, ftpConfig.Port);
 
@@ -104,7 +103,7 @@ namespace genesis_valida_importacao_teste.consome_ftp
 
         private async Task HandleZip(Layouts validador, AsyncFtpClient ftpClient, FtpListItem item, CancellationToken token)
         {
-
+            Console.WriteLine(item.Name);
             ValidaArquivo.Valida(item.Name, item.Size, validador);
             MemoryStream ms = new MemoryStream();
             await ftpClient.DownloadStream(ms, item.FullName);
@@ -139,6 +138,7 @@ namespace genesis_valida_importacao_teste.consome_ftp
             List<Layouts> validadores = [.. validadoresConfig.Validadores];
             Parallel.ForEach(validadores, async validador =>
             {
+                Console.WriteLine($"****************Inicio {validador.S3Folder}, {DateTime.UtcNow}");
                 var token = new CancellationToken();
                 var ftpClient = new AsyncFtpClient(ftpConfig.Host, ftpConfig.User, ftpConfig.Password, ftpConfig.Port);
 
@@ -166,6 +166,8 @@ namespace genesis_valida_importacao_teste.consome_ftp
                     }
                 };
                 ftpClient.Dispose();
+
+                Console.WriteLine($"****************Fim {validador.S3Folder}, {DateTime.UtcNow}");
             });
 
             
