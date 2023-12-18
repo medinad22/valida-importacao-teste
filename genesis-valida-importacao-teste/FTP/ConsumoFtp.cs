@@ -62,7 +62,7 @@ namespace genesis_valida_importacao_teste.consome_ftp
             {
                 var token = new CancellationToken();
                 var ftpClient = new AsyncFtpClient(ftpConfig.Host, ftpConfig.User, ftpConfig.Password, ftpConfig.Port);
-
+                
                 await ftpClient.AutoConnect();
 
                 FtpListItem[] items = await ftpClient.GetListing(validador.Diretorio);
@@ -173,5 +173,84 @@ namespace genesis_valida_importacao_teste.consome_ftp
             
         }
 
+        public void IniciaConsumoParaleloSyncTalvez()
+        {
+            List<Layouts> validadores = [.. validadoresConfig.Validadores];
+            Parallel.ForEach(validadores, validador =>
+            {
+                var inicio = DateTime.UtcNow;
+                Console.WriteLine($"****************Inicio {validador.S3Folder}, {inicio}");
+                
+                var ftpClient = new FtpClient(ftpConfig.Host, ftpConfig.User, ftpConfig.Password, ftpConfig.Port);
+
+                ftpClient.AutoConnect();
+
+                FtpListItem[] items = ftpClient.GetListing(validador.Diretorio);
+
+                foreach (var item in items)
+                {
+                    switch (item.Type)
+                    {
+                        case FtpObjectType.File:
+                            if (item.Name.ContainsCI(".zip"))
+                            {
+                                HandleZip2(validador, ftpClient, item);
+                            }
+                            else
+                            {
+                                HandleFile2(validador, ftpClient, item);
+                            }
+                            break;
+
+                        case FtpObjectType.Link:
+                            break;
+                    }
+                };
+                ftpClient.Dispose();
+                var fim = DateTime.UtcNow;
+                Console.WriteLine($"****************Fim {validador.S3Folder}, {fim}");
+                Console.WriteLine($"****************Duracao {fim.Subtract(inicio)}");
+            });
+
+
+        }
+        private void HandleFile2(Layouts validador, FtpClient ftpClient, FtpListItem item)
+        {
+            Console.WriteLine(item.Name);
+            ValidaArquivo.Valida(item.Name, item.Size, validador);
+            byte[] bytes;
+            ftpClient.DownloadBytes(out bytes, item.FullName);
+            enviaArquivo.EnviaArquivoFTP2(bytes, validador, item.Name);
+        }
+
+        private void HandleZip2(Layouts validador, FtpClient ftpClient, FtpListItem item)
+        {
+            Console.WriteLine(item.Name);
+            ValidaArquivo.Valida(item.Name, item.Size, validador);
+            MemoryStream ms = new MemoryStream();
+            ftpClient.DownloadStream(ms, item.FullName);
+            ZipArchive zipArchives = new ZipArchive(ms, ZipArchiveMode.Read, true);
+
+            foreach (var item1 in zipArchives.Entries)
+            {
+                Console.WriteLine(item1.Name);
+                using (var stream = item1.Open())
+                {
+                    using (var ms2 = new MemoryStream())
+                    {
+                        byte[] buffer = new byte[item1.Length];
+                        int bytesRead;
+                        while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            ms2.Write(buffer, 0, bytesRead);
+                        }
+
+                        byte[] bytes = ms2.ToArray();
+                        Console.WriteLine("Salvo na memória");
+                        enviaArquivo.EnviaArquivoFTP2(bytes, validador, item1.Name);
+                    }
+                }
+            }
+        }
     }
 }

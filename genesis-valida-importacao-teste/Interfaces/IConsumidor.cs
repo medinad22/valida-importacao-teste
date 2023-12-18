@@ -7,6 +7,6 @@
         void IniciaConsumo2();
 
         void IniciaConsumoParalelo();
-
+        void IniciaConsumoParaleloSyncTalvez();
     }
 }

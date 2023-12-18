@@ -1,10 +1,5 @@
-﻿using genesis_valida_importacao_teste.consome_smtp;
-using genesis_valida_importacao_teste.Interfaces;
-using genesis_valida_importacao_teste.valida_arquivo;
+﻿using genesis_valida_importacao_teste.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using System.Linq;
 
 namespace genesis_valida_importacao_teste.Controllers
 {
@@ -18,7 +13,7 @@ namespace genesis_valida_importacao_teste.Controllers
         public IActionResult Processo()
         {
            
-            _consumidor.IniciaConsumoParalelo();
+            _consumidor.IniciaConsumoParaleloSyncTalvez();
             return Ok();
         }
 
