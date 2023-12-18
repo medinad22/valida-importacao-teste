@@ -2,6 +2,6 @@
 {
     public class ValidadoresOptions
     {
-        public List<Validadores> Validadores { get; set; }
+        public List<Layouts> Validadores { get; set; }
     }
 }
